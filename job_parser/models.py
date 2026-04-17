@@ -23,7 +23,7 @@ class SourceDefinition:
     url: str
     card_selector: str
     title_selector: str
-    link_selector: str
+    link_selector: str | None
     company_selector: str | None
     date_selector: str | None
     next_selector: str | None
@@ -31,4 +31,5 @@ class SourceDefinition:
     company_attribute: str | None = None
     date_attribute: str | None = None
     prefer_playwright: bool = False
+    wait_for_selector: str | None = None
 

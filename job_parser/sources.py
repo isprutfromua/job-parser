@@ -127,6 +127,7 @@ def build_sources() -> list[SourceDefinition]:
             company_attribute="alt",
             date_attribute="title",
             prefer_playwright=False,
+            wait_for_selector="#pjax-jobs-list h2 > a",
         ),
         SourceDefinition(
             key="work_vinnytsia_it",
@@ -142,6 +143,7 @@ def build_sources() -> list[SourceDefinition]:
             company_attribute="alt",
             date_attribute="title",
             prefer_playwright=False,
+            wait_for_selector="#pjax-jobs-list h2 > a",
         ),
         SourceDefinition(
             key="work_remote_deftech",
@@ -157,6 +159,7 @@ def build_sources() -> list[SourceDefinition]:
             company_attribute="alt",
             date_attribute="title",
             prefer_playwright=False,
+            wait_for_selector="#pjax-jobs-list h2 > a",
         ),
         SourceDefinition(
             key="work_vinnytsia_deftech",
@@ -172,6 +175,7 @@ def build_sources() -> list[SourceDefinition]:
             company_attribute="alt",
             date_attribute="title",
             prefer_playwright=False,
+            wait_for_selector="#pjax-jobs-list h2 > a",
         ),
         SourceDefinition(
             key="robota_remote_it",
@@ -186,6 +190,7 @@ def build_sources() -> list[SourceDefinition]:
             date_selector=None,
             next_selector="santa-pagination-with-links a:last-of-type",
             prefer_playwright=True,
+            wait_for_selector="alliance-jobseeker-desktop-vacancies-list a.card",
         ),
         SourceDefinition(
             key="robota_remote_non_ukraine_it",
@@ -200,6 +205,7 @@ def build_sources() -> list[SourceDefinition]:
             date_selector=None,
             next_selector="santa-pagination-with-links a:last-of-type",
             prefer_playwright=True,
+            wait_for_selector="alliance-jobseeker-desktop-vacancies-list a.card",
         ),
         SourceDefinition(
             key="robota_vinnytsia_it",
@@ -214,6 +220,7 @@ def build_sources() -> list[SourceDefinition]:
             date_selector=None,
             next_selector="santa-pagination-with-links a:last-of-type",
             prefer_playwright=True,
+            wait_for_selector="alliance-jobseeker-desktop-vacancies-list a.card",
         ),
         SourceDefinition(
             key="robota_remote_deftech",
@@ -228,6 +235,7 @@ def build_sources() -> list[SourceDefinition]:
             date_selector=None,
             next_selector="santa-pagination-with-links a:last-of-type",
             prefer_playwright=True,
+            wait_for_selector="alliance-jobseeker-desktop-vacancies-list a.card",
         ),
         SourceDefinition(
             key="robota_vinnytsia_deftech",
@@ -242,6 +250,7 @@ def build_sources() -> list[SourceDefinition]:
             date_selector=None,
             next_selector="santa-pagination-with-links a:last-of-type",
             prefer_playwright=True,
+            wait_for_selector="alliance-jobseeker-desktop-vacancies-list a.card",
         ),
     ]
 

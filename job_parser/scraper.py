@@ -90,17 +90,26 @@ def iter_source_vacancies(source: SourceDefinition, max_pages: int | None = None
         if max_pages is not None and pages_scanned >= max_pages:
             break
 
+        used_playwright = source.prefer_playwright
         if source.prefer_playwright:
-            html = fetch_html_with_playwright(current_url)
+            html = fetch_html_with_playwright(current_url, wait_for_selector=source.wait_for_selector)
         else:
             try:
                 html = fetch_html(current_url)
             except HTTPError as error:
                 if error.code != 403:
                     raise
-                html = fetch_html_with_playwright(current_url)
+                html = fetch_html_with_playwright(current_url, wait_for_selector=source.wait_for_selector)
+                used_playwright = True
         pages_scanned += 1
         vacancies, next_url = parse_vacancies(html, source, current_url)
+
+        # Some sources return a JS shell or anti-bot page to plain HTTP requests.
+        # Retry once with Playwright when parsing returns no vacancy cards.
+        if not vacancies and not used_playwright:
+            html = fetch_html_with_playwright(current_url, wait_for_selector=source.wait_for_selector or source.card_selector)
+            vacancies, next_url = parse_vacancies(html, source, current_url)
+
         for vacancy in vacancies:
             vacancy.hash = vacancy_hash(vacancy.company, vacancy.title)
             yield vacancy

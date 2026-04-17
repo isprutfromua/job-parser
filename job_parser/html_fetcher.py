@@ -20,7 +20,11 @@ def fetch_html(url: str, timeout_seconds: int = 30) -> str:
         return content.decode(charset, errors="replace")
 
 
-def fetch_html_with_playwright(url: str, timeout_seconds: int = 30000) -> str:
+def fetch_html_with_playwright(
+    url: str,
+    timeout_seconds: int = 30000,
+    wait_for_selector: str | None = None,
+) -> str:
     try:
         from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
         from playwright.sync_api import sync_playwright
@@ -56,6 +60,8 @@ def fetch_html_with_playwright(url: str, timeout_seconds: int = 30000) -> str:
             for wait_until in wait_until_states:
                 try:
                     page.goto(url, wait_until=wait_until, timeout=timeout_ms)
+                    if wait_for_selector:
+                        page.wait_for_selector(wait_for_selector, timeout=timeout_ms)
                     return page.content()
                 except PlaywrightTimeoutError as error:
                     last_timeout_error = error

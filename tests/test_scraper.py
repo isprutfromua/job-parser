@@ -101,7 +101,49 @@ def test_iter_source_vacancies_falls_back_to_playwright_on_403(monkeypatch) -> N
     def fake_fetch_html(url: str, timeout_seconds: int = 30) -> str:
         raise HTTPError(url, 403, "Forbidden", hdrs=None, fp=None)
 
-    def fake_fetch_html_with_playwright(url: str, timeout_seconds: int = 30000) -> str:
+    def fake_fetch_html_with_playwright(
+        url: str,
+        timeout_seconds: int = 30000,
+        wait_for_selector: str | None = None,
+    ) -> str:
+        return '<div class="card"><a href="/job-1">Job 1</a></div>'
+
+    monkeypatch.setattr("job_parser.scraper.fetch_html", fake_fetch_html)
+    monkeypatch.setattr("job_parser.scraper.fetch_html_with_playwright", fake_fetch_html_with_playwright)
+
+    vacancies = list(iter_source_vacancies(source, max_pages=1))
+
+    assert len(vacancies) == 1
+    assert vacancies[0].title == "Job 1"
+    assert vacancies[0].link == "https://example.com/job-1"
+
+
+def test_iter_source_vacancies_retries_with_playwright_when_static_parse_is_empty(monkeypatch) -> None:
+    source = SourceDefinition(
+        key="work_like",
+        name="work_like",
+        category="remote, it",
+        url="https://example.com/page-1",
+        card_selector=".card",
+        title_selector="a",
+        link_selector="a",
+        company_selector=None,
+        date_selector=None,
+        next_selector=None,
+        prefer_playwright=False,
+        wait_for_selector=".card a",
+    )
+
+    def fake_fetch_html(url: str, timeout_seconds: int = 30) -> str:
+        # Simulate a bot/check page that contains no matching vacancy cards.
+        return "<html><body><div>checking your browser...</div></body></html>"
+
+    def fake_fetch_html_with_playwright(
+        url: str,
+        timeout_seconds: int = 30000,
+        wait_for_selector: str | None = None,
+    ) -> str:
+        assert wait_for_selector == ".card a"
         return '<div class="card"><a href="/job-1">Job 1</a></div>'
 
     monkeypatch.setattr("job_parser.scraper.fetch_html", fake_fetch_html)
