@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Iterable
+from urllib.error import HTTPError
 from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
@@ -89,11 +90,15 @@ def iter_source_vacancies(source: SourceDefinition, max_pages: int | None = None
         if max_pages is not None and pages_scanned >= max_pages:
             break
 
-        html = (
-            fetch_html_with_playwright(current_url)
-            if source.prefer_playwright
-            else fetch_html(current_url)
-        )
+        if source.prefer_playwright:
+            html = fetch_html_with_playwright(current_url)
+        else:
+            try:
+                html = fetch_html(current_url)
+            except HTTPError as error:
+                if error.code != 403:
+                    raise
+                html = fetch_html_with_playwright(current_url)
         pages_scanned += 1
         vacancies, next_url = parse_vacancies(html, source, current_url)
         for vacancy in vacancies:

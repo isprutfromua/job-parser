@@ -1,6 +1,7 @@
 from job_parser.models import SourceDefinition
 from job_parser.scraper import iter_source_vacancies, parse_vacancies
 from job_parser.sources import build_sources
+from urllib.error import HTTPError
 
 
 def test_parse_dou_like_vacancy_card() -> None:
@@ -80,4 +81,35 @@ def test_iter_source_vacancies_honors_max_pages(monkeypatch) -> None:
         "https://example.com/page-5",
     ]
     assert len(vacancies) == 5
+
+
+def test_iter_source_vacancies_falls_back_to_playwright_on_403(monkeypatch) -> None:
+    source = SourceDefinition(
+        key="example_work",
+        name="example_work",
+        category="remote, it",
+        url="https://example.com/page-1",
+        card_selector=".card",
+        title_selector="a",
+        link_selector="a",
+        company_selector=None,
+        date_selector=None,
+        next_selector=None,
+        prefer_playwright=False,
+    )
+
+    def fake_fetch_html(url: str, timeout_seconds: int = 30) -> str:
+        raise HTTPError(url, 403, "Forbidden", hdrs=None, fp=None)
+
+    def fake_fetch_html_with_playwright(url: str, timeout_seconds: int = 30000) -> str:
+        return '<div class="card"><a href="/job-1">Job 1</a></div>'
+
+    monkeypatch.setattr("job_parser.scraper.fetch_html", fake_fetch_html)
+    monkeypatch.setattr("job_parser.scraper.fetch_html_with_playwright", fake_fetch_html_with_playwright)
+
+    vacancies = list(iter_source_vacancies(source, max_pages=1))
+
+    assert len(vacancies) == 1
+    assert vacancies[0].title == "Job 1"
+    assert vacancies[0].link == "https://example.com/job-1"
 
