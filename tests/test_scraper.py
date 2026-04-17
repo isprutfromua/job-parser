@@ -175,10 +175,10 @@ def test_iter_source_vacancies_retries_with_playwright_when_static_parse_is_empt
     assert vacancies[0].link == "https://example.com/job-1"
 
 
-def test_iter_source_vacancies_retries_playwright_without_wait_selector_on_timeout(monkeypatch) -> None:
+def test_iter_source_vacancies_playwright_timeout_retry(monkeypatch) -> None:
     source = SourceDefinition(
-        key="work_like",
-        name="work_like",
+        key="test_source_with_timeout",
+        name="test_source_with_timeout",
         category="remote, it",
         url="https://example.com/page-1",
         card_selector=".card",

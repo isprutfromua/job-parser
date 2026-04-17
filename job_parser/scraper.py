@@ -10,16 +10,19 @@ from job_parser.hashing import vacancy_hash
 from job_parser.html_fetcher import fetch_html, fetch_html_with_playwright
 from job_parser.models import SourceDefinition, Vacancy
 
+try:
+    from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
-def _is_playwright_timeout_error(error: Exception) -> bool:
-    return error.__class__.__name__ == "TimeoutError" or "Timeout" in str(error)
-
+    PLAYWRIGHT_TIMEOUT_ERRORS = (TimeoutError, PlaywrightTimeoutError)
+except ImportError:
+    PLAYWRIGHT_TIMEOUT_ERRORS = (TimeoutError,)
 
 def _fetch_with_playwright_fallback(url: str, wait_for_selector: str | None) -> str:
+    """Fetch page HTML with Playwright and retry once without selector wait on timeout."""
     try:
         return fetch_html_with_playwright(url, wait_for_selector=wait_for_selector)
-    except Exception as error:
-        if not wait_for_selector or not _is_playwright_timeout_error(error):
+    except PLAYWRIGHT_TIMEOUT_ERRORS:
+        if wait_for_selector is None:
             raise
         return fetch_html_with_playwright(url, wait_for_selector=None)
 
