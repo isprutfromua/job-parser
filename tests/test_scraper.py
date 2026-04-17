@@ -42,6 +42,25 @@ def test_parse_ignores_javascript_next_links() -> None:
     assert next_url == ""
 
 
+def test_parse_work_ua_with_updated_container_id() -> None:
+    source = next(item for item in build_sources() if item.key == "work_remote_it")
+    html = """
+    <div id="pjax-job-list">
+      <div>
+        <img alt="Acme" />
+        <h2><a href="/jobs/1/" title="сьогодні">Senior Python Developer</a></h2>
+      </div>
+    </div>
+    """
+    vacancies, next_url = parse_vacancies(html, source, "https://www.work.ua/jobs-remote-it-industry-it/?days=123")
+    assert len(vacancies) == 1
+    assert vacancies[0].title == "Senior Python Developer"
+    assert vacancies[0].company == "Acme"
+    assert vacancies[0].link == "https://www.work.ua/jobs/1/"
+    assert vacancies[0].date_text == "сьогодні"
+    assert next_url is None
+
+
 def test_iter_source_vacancies_honors_max_pages(monkeypatch) -> None:
     source = SourceDefinition(
         key="example",
@@ -154,4 +173,3 @@ def test_iter_source_vacancies_retries_with_playwright_when_static_parse_is_empt
     assert len(vacancies) == 1
     assert vacancies[0].title == "Job 1"
     assert vacancies[0].link == "https://example.com/job-1"
-
