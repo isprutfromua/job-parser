@@ -18,6 +18,7 @@ jobs:
     timeout-minutes: 120
 
     env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       JOB_PARSER_DB_PATH: ./data/job_parser.sqlite3
