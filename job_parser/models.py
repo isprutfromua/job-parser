@@ -32,4 +32,5 @@ class SourceDefinition:
     date_attribute: str | None = None
     prefer_playwright: bool = False
     wait_for_selector: str | None = None
+    stop_on_known: bool = True
 

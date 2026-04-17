@@ -39,13 +39,15 @@ def run_scan(
             for vacancy in iter_source_vacancies(source, max_pages=max_pages):
                 scanned_count += 1
                 if store.has_hash(vacancy.hash):
-                    stopped_on_known = True
-                    logger.info(
-                        "Stopping source %s after known vacancy %s",
-                        source.key,
-                        vacancy.title,
-                    )
-                    break
+                    if source.stop_on_known:
+                        stopped_on_known = True
+                        logger.info(
+                            "Stopping source %s after known vacancy %s",
+                            source.key,
+                            vacancy.title,
+                        )
+                        break
+                    continue
                 if store.save_vacancy(vacancy):
                     grouped_new_vacancies[vacancy.category].append(vacancy)
             logger.info(

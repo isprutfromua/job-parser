@@ -128,6 +128,7 @@ def build_sources() -> list[SourceDefinition]:
             date_attribute="title",
             prefer_playwright=False,
             wait_for_selector="#pjax-jobs-list h2 a, #pjax-job-list h2 a, #jobs-list h2 a, .job-link h2 a",
+            stop_on_known=False,
         ),
         SourceDefinition(
             key="work_vinnytsia_it",
@@ -144,6 +145,7 @@ def build_sources() -> list[SourceDefinition]:
             date_attribute="title",
             prefer_playwright=False,
             wait_for_selector="#pjax-jobs-list h2 a, #pjax-job-list h2 a, #jobs-list h2 a, .job-link h2 a",
+            stop_on_known=False,
         ),
         SourceDefinition(
             key="work_remote_deftech",
@@ -160,6 +162,7 @@ def build_sources() -> list[SourceDefinition]:
             date_attribute="title",
             prefer_playwright=False,
             wait_for_selector="#pjax-jobs-list h2 a, #pjax-job-list h2 a, #jobs-list h2 a, .job-link h2 a",
+            stop_on_known=False,
         ),
         SourceDefinition(
             key="work_vinnytsia_deftech",
@@ -176,6 +179,7 @@ def build_sources() -> list[SourceDefinition]:
             date_attribute="title",
             prefer_playwright=False,
             wait_for_selector="#pjax-jobs-list h2 a, #pjax-job-list h2 a, #jobs-list h2 a, .job-link h2 a",
+            stop_on_known=False,
         ),
         SourceDefinition(
             key="robota_remote_it",
