@@ -18,17 +18,16 @@ jobs:
     timeout-minutes: 120
 
     env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       JOB_PARSER_DB_PATH: ./data/job_parser.sqlite3
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
