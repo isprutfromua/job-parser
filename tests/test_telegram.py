@@ -7,15 +7,39 @@ def test_format_category_message_groups_as_requested() -> None:
         "remote, it",
         [
             Vacancy(
-                source_key="x",
-                source_name="y",
+                source_key="dou_remote_it",
+                source_name="DOU",
                 category="remote, it",
                 title="Python Developer",
                 link="https://example.com/job/1",
-            )
+            ),
+            Vacancy(
+                source_key="djinni_remote_it",
+                source_name="Djinni",
+                category="remote, it",
+                title="Backend Engineer",
+                link="https://example.com/job/2",
+            ),
+            Vacancy(
+                source_key="dou_remote_it",
+                source_name="DOU",
+                category="remote, it",
+                title="DevOps Engineer",
+                link="https://example.com/job/3",
+            ),
         ],
     )
-    assert message == "нові вакансії в категорії remote, it:\n- Python Developer, https://example.com/job/1"
+    assert message == (
+        "📌 Категорія: remote, it\n"
+        "📊 Вакансій: 3\n"
+        "\n"
+        "🧭 DOU (2):\n"
+        "• Python Developer — https://example.com/job/1\n"
+        "• DevOps Engineer — https://example.com/job/3\n"
+        "\n"
+        "🧭 Djinni (1):\n"
+        "• Backend Engineer — https://example.com/job/2"
+    )
 
 
 def test_send_message_splits_long_payloads(monkeypatch) -> None:

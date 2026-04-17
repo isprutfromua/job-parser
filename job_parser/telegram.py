@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from collections import OrderedDict
 from dataclasses import dataclass
 from typing import Iterable
 from urllib.error import HTTPError, URLError
@@ -75,8 +76,20 @@ class TelegramClient:
 
 
 def format_category_message(category: str, vacancies: Iterable[Vacancy]) -> str:
-    lines = [f"нові вакансії в категорії {category}:"]
+    grouped_by_source: OrderedDict[str, list[Vacancy]] = OrderedDict()
+    total = 0
+
     for vacancy in vacancies:
-        lines.append(f"- {vacancy.title}, {vacancy.link}")
+        source_label = vacancy.source_name.strip() or vacancy.source_key.strip() or "Unknown source"
+        grouped_by_source.setdefault(source_label, []).append(vacancy)
+        total += 1
+
+    lines = [f"📌 Категорія: {category}", f"📊 Вакансій: {total}"]
+    for source, source_vacancies in grouped_by_source.items():
+        lines.append("")
+        lines.append(f"🧭 {source} ({len(source_vacancies)}):")
+        for vacancy in source_vacancies:
+            lines.append(f"• {vacancy.title} — {vacancy.link}")
+
     return "\n".join(lines)
 
