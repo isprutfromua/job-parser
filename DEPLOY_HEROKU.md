@@ -71,6 +71,14 @@ worker - сканує джерела кожні 2 години
 
 Після першого dry-run, worker почне шукати нові вакансії згідно `JOB_PARSER_INTERVAL_MINUTES` (за замовч. 120 хв).
 
+### Якщо cron перенесено в GitHub Actions
+
+Щоб не отримувати дублікати від паралельних запусків, вимкніть Heroku worker:
+
+```bash
+heroku ps:scale worker=0 -a job-parser
+```
+
 ## Необов'язкові змінні оточення
 
 ```bash
