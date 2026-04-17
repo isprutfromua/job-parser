@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from job_parser.models import SourceDefinition, Vacancy
-from job_parser.service import run_dry_run
+from job_parser.service import run_once
 
 
-def test_run_dry_run_does_not_touch_store_or_telegram(monkeypatch) -> None:
+def test_run_once_persists_only_new_vacancy_and_stops_on_known(monkeypatch) -> None:
     source = SourceDefinition(
         key="example",
         name="example",
@@ -17,6 +17,27 @@ def test_run_dry_run_does_not_touch_store_or_telegram(monkeypatch) -> None:
         date_selector=None,
         next_selector=None,
     )
+    saved: list[Vacancy] = []
+    sent_messages: list[str] = []
+
+    class FakeStore:
+        def start_run(self) -> int:
+            return 1
+
+        def has_hash(self, hash_value: str) -> bool:
+            return hash_value == "known"
+
+        def save_vacancy(self, vacancy: Vacancy) -> bool:
+            saved.append(vacancy)
+            return True
+
+        def finish_run(self, run_id: int, status: str, note: str = "") -> None:
+            assert run_id == 1
+            assert status == "success"
+
+    class FakeTelegram:
+        def send_message(self, text: str) -> None:
+            sent_messages.append(text)
 
     def fake_iter_source_vacancies(source_definition, max_pages=None):
         yield Vacancy(
@@ -25,10 +46,22 @@ def test_run_dry_run_does_not_touch_store_or_telegram(monkeypatch) -> None:
             category=source_definition.category,
             title="Job 1",
             link="https://example.com/job-1",
+            hash="new",
+        )
+        yield Vacancy(
+            source_key=source_definition.key,
+            source_name=source_definition.name,
+            category=source_definition.category,
+            title="Known Job",
+            link="https://example.com/job-known",
+            hash="known",
         )
 
     monkeypatch.setattr("job_parser.service.iter_source_vacancies", fake_iter_source_vacancies)
 
-    grouped = run_dry_run(sources=[source], max_pages=5)
+    grouped = run_once(store=FakeStore(), telegram=FakeTelegram(), sources=[source])
 
+    assert len(saved) == 1
+    assert saved[0].title == "Job 1"
     assert grouped["remote, it"][0].title == "Job 1"
+    assert len(sent_messages) == 1

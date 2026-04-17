@@ -4,20 +4,6 @@ on:
   schedule:
     - cron: "0 5-17/2 * * *"
   workflow_dispatch:
-    inputs:
-      run_mode:
-        description: "Run mode"
-        required: true
-        default: once
-        type: choice
-        options:
-          - once
-          - dry-run
-      dry_run_pages:
-        description: "Pages per source for dry-run"
-        required: true
-        default: "5"
-        type: string
 
 concurrency:
   group: job-parser-schedule
@@ -63,12 +49,8 @@ jobs:
         run: python -m job_parser.cli once
 
       - name: Manual run (once)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode == 'once' }}
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         run: python -m job_parser.cli once
-
-      - name: Manual run (dry-run)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode == 'dry-run' }}
-        run: python -m job_parser.cli dry-run --pages ${{ inputs.dry_run_pages }}
 
       - name: Commit database changes
         if: ${{ success() }}

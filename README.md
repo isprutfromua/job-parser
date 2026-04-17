@@ -10,7 +10,6 @@ Worker that scans job boards every 2 hours, stores seen vacancies, and sends new
 ## Commands
 
 - `python -m job_parser.cli once` - run a single scan with database and Telegram
-- `python -m job_parser.cli dry-run --pages 5` - test without database writes (first 5 pages per source)
 - `python -m job_parser.cli worker` - run the 2-hour polling loop
 
 ## Environment
@@ -50,7 +49,7 @@ This repository includes a workflow in `.github/workflows/job-parser-cron.yml` t
 
 - run on schedule every 2 hours
 - run in a UTC window aligned to daytime Kyiv hours
-- run manually with `workflow_dispatch` in either `once` or `dry-run` mode
+- run manually with `workflow_dispatch` in `once` mode
 
 Required GitHub repository secrets:
 
