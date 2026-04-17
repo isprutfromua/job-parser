@@ -1,4 +1,4 @@
-# System dependencies for Playwright on Heroku-24 (Ubuntu 24)
+# System dependencies for Playwright on Ubuntu 24
 ca-certificates
 fonts-liberation
 fonts-dejavu-core

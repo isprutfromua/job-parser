@@ -2,8 +2,7 @@ name: Job Parser Schedule
 
 on:
   schedule:
-    # Every 2 hours; quiet-hours filtering is handled in a step using Europe/Kyiv time.
-    - cron: "0 */2 * * *"
+    - cron: "0 5-17/2 * * *"
   workflow_dispatch:
     inputs:
       run_mode:
@@ -19,15 +18,13 @@ on:
         required: true
         default: "5"
         type: string
-      ignore_quiet_hours:
-        description: "Ignore quiet hours (22:00-08:00 Europe/Kyiv)"
-        required: true
-        default: false
-        type: boolean
 
 concurrency:
   group: job-parser-schedule
   cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   run-parser:
@@ -47,14 +44,8 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Restore DB cache
-        uses: actions/cache/restore@v4
-        with:
-          path: data/job_parser.sqlite3
-          key: job-parser-db-v1-${{ github.run_id }}
-          restore-keys: |
-            job-parser-db-v1-
+          cache: pip
+          cache-dependency-path: requirements.txt
 
       - name: Ensure DB directory exists
         run: mkdir -p data
@@ -67,41 +58,27 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Check quiet hours (Europe/Kyiv)
-        id: quiet_hours
-        if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.ignore_quiet_hours == false) }}
-        run: |
-          python - <<'PY'
-          from datetime import datetime
-          from zoneinfo import ZoneInfo
-
-          now = datetime.now(ZoneInfo("Europe/Kyiv"))
-          # Quiet window: 22:00 <= time < 08:00
-          in_quiet = now.hour >= 22 or now.hour < 8
-          should_run = not in_quiet
-
-          print(f"Kyiv time: {now.isoformat()}")
-          print(f"Quiet hours active: {in_quiet}")
-
-          with open("$GITHUB_OUTPUT", "a", encoding="utf-8") as out:
-              out.write(f"should_run={'true' if should_run else 'false'}\n")
-          PY
-
       - name: Scheduled run (once)
-        if: ${{ github.event_name == 'schedule' && steps.quiet_hours.outputs.should_run == 'true' }}
+        if: ${{ github.event_name == 'schedule' }}
         run: python -m job_parser.cli once
 
       - name: Manual run (once)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode == 'once' && (inputs.ignore_quiet_hours || steps.quiet_hours.outputs.should_run == 'true') }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode == 'once' }}
         run: python -m job_parser.cli once
 
       - name: Manual run (dry-run)
-        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode == 'dry-run' && (inputs.ignore_quiet_hours || steps.quiet_hours.outputs.should_run == 'true') }}
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_mode == 'dry-run' }}
         run: python -m job_parser.cli dry-run --pages ${{ inputs.dry_run_pages }}
 
-      - name: Save DB cache
-        if: always()
-        uses: actions/cache/save@v4
-        with:
-          path: data/job_parser.sqlite3
-          key: job-parser-db-v1-${{ github.run_id }}
+      - name: Commit database changes
+        if: ${{ success() }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          if git diff --quiet data/job_parser.sqlite3; then
+            echo "No DB changes to commit"
+          else
+            git add data/job_parser.sqlite3
+            git commit -m "Database update: $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
+            git push
+          fi

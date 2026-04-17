@@ -42,9 +42,8 @@ htmlcov/
 .env.*.local
 
 # Data
-data/
-*.sqlite3
-*.db
+# SQLite database is tracked in git for persistence
+# Other data files can be ignored if needed
 
 # Playwright browsers (will be installed during deployment)
 .playwright/
